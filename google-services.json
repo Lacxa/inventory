@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "101252605593",
+    "firebase_url": "https://medics-inventorry-default-rtdb.firebaseio.com",
+    "project_id": "medics-inventorry",
+    "storage_bucket": "medics-inventorry.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:101252605593:android:23a9ef491fc49805313a08",
+        "android_client_info": {
+          "package_name": "scaner.one"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "101252605593-u7atkmh9rb9q6n31hah7gjgbotdub0b9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6A8lnLzB_lZBV9F1Os6x-sc21RNGs5Zk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "101252605593-u7atkmh9rb9q6n31hah7gjgbotdub0b9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
