@@ -8,19 +8,20 @@ from firebase_admin import credentials, initialize_app, db
 if not firebase_admin._apps:
     cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
     initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-    ref = db.reference('Register').child("phone").child("passward")
+    ref = db.reference('Register').child("phone")
     print("New Start")
     ref.set(
         {
-            "user_phone": "0714069014",
+            "user_phone": "0714069084",
             "pasword": "kkk",
 
         }
     )
     print("Done")
 
+
 class Transfer:
-    current_time = str(datetime.datetime.now())
+    current_time = str(datetime.now())
     date, time = current_time.strip().split()
     week_day = ""
     day = ""
@@ -41,24 +42,19 @@ class Transfer:
                 initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
                 print("Starting deployment....", int(phone))
 
-                ref = db.reference('Shoppy').child('Users')
+                ref = db.reference('Inventory').child('Users')
                 users = ref.get()
                 if phone in users:
                     print('It there')
                 else:
-                    ref = db.reference('Shoppy').child("Users").child(phone)
+                    ref = db.reference('Inventory').child("Users").child(phone)
                     print("horray!!!")
                     ref.set(
                         {
                             'user_name': name,
                             'phone': phone,
 
-
                         })
 
 
-
-
-
-
-
+#Transfer.register(Transfer(), "0714069014", "123")

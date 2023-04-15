@@ -15,8 +15,6 @@ from pyzbar.pyzbar import decode
 
 Window.size = [420, 740]
 
-
-
 class Scan_Analyze(Preview):
     extracted_data = ObjectProperty(None)
 

@@ -2,7 +2,6 @@ import json
 import requests
 
 
-
 def phone_repr(phone):
     new_number = ""
     if phone != "":

@@ -2,9 +2,50 @@
 
 
 ScreenManager
-
     id:manager
     transition:sm.FadeTransition(duration=.0)
+    MDScreen:
+        name:'register'
+        FloatLayout:
+            orientation:'vertical'
+            MDLabel:
+                bold:True
+                text:'CREATE YOUR ACCOUNT'
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.5, 'center_y':.8}
+                theme_text_color: "Custom"
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+            NumberOnlyField:
+                id:number
+                mode: "rectangle"
+                fill_color: 0, 0, 0, .4
+                size_hint: .6, .1
+                hint_text:"Phone number:"
+                pos_hint:{'center_x':.5, 'center_y':.7}
+                text_color: 0, 0, 0, 1
+                font_size: dp(25)
+            MDTextField:
+                id:password
+                mode: "rectangle"
+                fill_color: 0, 0, 0, .4
+                size_hint: .6, .1
+                pos_hint:{'center_x':.5, 'center_y':.55}
+                hint_text:"Password:"
+                text_color: 0, 0, 0, 1
+                font_size: dp(25)
+            MDFillRoundFlatButton:
+                id:b_register
+                text: "Verify & Register"
+                size_hint: .5, .06
+                text_color: 1, 1, 1, 1
+                pos_hint:{'center_x':.5, 'center_y':.4}
+                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
+                on_release:
+                    app.validate_user(number.text, password.text)
+
     MDScreen:
         name:'home'
         FloatLayout:
@@ -270,47 +311,6 @@ ScreenManager
                 theme_text_color: "Custom"
                 text_color: 0, 0, 0, .4
 
-    MDScreen:
-        name:'register'
-        FloatLayout:
-            orientation:'vertical'
-            MDLabel:
-                bold:True
-                text:'CREATE YOUR ACCOUNT'
-                halign:"center"
-                font_style:'H6'
-                pos_hint:{'center_x':.5, 'center_y':.8}
-                theme_text_color: "Custom"
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                height: self.texture_size[1]
-                width: self.texture_size[1]
-            NumberOnlyField:
-                id:number
-                mode: "rectangle"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                hint_text:"Phone number:"
-                pos_hint:{'center_x':.5, 'center_y':.7}
-                text_color: 0, 0, 0, 1
-                font_size: dp(25)
-            MDTextField:
-                id:username
-                mode: "rectangle"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                pos_hint:{'center_x':.5, 'center_y':.55}
-                hint_text:"Password:"
-                text_color: 0, 0, 0, 1
-                font_size: dp(25)
-            MDRoundFlatButton:
-                id:b_register
-                text: "Verify & Register"
-                size_hint: .5, .06
-                text_color: 1, 1, 1, 1
-                pos_hint:{'center_x':.5, 'center_y':.4}
-                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
-                on_release:
-                    app.validate_user(number.text, password.text)
 
     MDScreen:
         name:'verify'

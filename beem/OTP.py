@@ -3,7 +3,6 @@ import json
 from BeemAfrica import Authorize, OTP
 
 
-
 # request class
 
 class req:
@@ -14,8 +13,8 @@ class req:
         URL = 'https://apiotp.beem.africa/v1/request'
         content_type = 'application/json'
         source_addr = 'INFO'
-        secrete_key = "YmE1NmRmNzVmY2JhN2RjYmI0ZGU1OTJlMzFlNWU4MDdhYzQ2MWNlNWVmZDVkNWFkNzYxOWUyNjRmNGNmYmNiNQ=="
-        api_key = 'b7a0b864387611b6 '
+        secrete_key = "YmFlN2NhYzRlZDUxYzU4OWVmNzZiMzc4YTliZjA4YmJhMzA1OWY3YWJiODFmZTNiOWVlNWQ5ZjM0M2ZiZDJmZA=="
+        api_key = 'd05504f161f6d65c'
         Authorize(api_key, secrete_key)
         req.phone = self.phone_repr(phone)
         print(phone)
