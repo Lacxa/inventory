@@ -5,46 +5,315 @@ ScreenManager
     id:manager
     transition:sm.FadeTransition(duration=.0)
     MDScreen:
-        name:'register'
+        name:'home'
+        FloatLayout:
+            orientation:'vertical'
+            MDIconButton:
+                icon:"magnify"
+                user_font_size:"50sp"
+                pos_hint:{'center_x':.9, 'center_y':.95}
+                theme_text_color: "Custom"
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                on_release:
+                    app.screen_capture("search")
+            Front:
+                pos_hint:{'center_x':.5, 'center_y':.7}
+                MDIconButton:
+                    icon:"plus"
+                    user_font_size:"100sp"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    on_release:
+                        app.screen_capture("add")
+
+            MDLabel:
+                halign:"center"
+                text:"Add Medicine"
+                pos_hint:{'center_x':.5, 'center_y':.6}
+            Front:
+                pos_hint:{'center_x':.5, 'center_y':.4}
+                MDIconButton:
+                    icon:"barcode-scan"
+                    user_font_size:"100sp"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    on_release:
+                        app.screen_capture("sell")
+
+            MDLabel:
+                halign:"center"
+                text:"Search Medicine"
+                pos_hint:{'center_x':.5, 'center_y':.3}
+
+    MDScreen:
+        name:"availability"
         FloatLayout:
             orientation:'vertical'
             MDLabel:
                 bold:True
-                text:'CREATE YOUR ACCOUNT'
+                text:'Medicine Information'
                 halign:"center"
                 font_style:'H6'
-                pos_hint:{'center_x':.5, 'center_y':.8}
+                pos_hint:{'center_x':.5, 'center_y':.85}
                 theme_text_color: "Custom"
                 text_color: 80 / 225, 136 / 225, 114 / 225, 1
                 height: self.texture_size[1]
                 width: self.texture_size[1]
+            MDLabel:
+                text:"Name"
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.3, 'center_y':.74}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:"Quantity"
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.3, 'center_y':.64}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:"Price"
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.3, 'center_y':.54}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:"Expiration Date"
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.3, 'center_y':.44}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDSeparator:
+                orientation:"vertical"
+                pos_hint:{"center_x":.5, "center_y":.6}
+                color:80 / 225, 136 / 225, 114 / 225, 1
+                width:1
+                size_hint:None, .25
+            MDLabel:
+                text:app.sname
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.74}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                id:quant
+                text:app.squantity
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.64}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:app.sprice
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.54}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:app.sexpire
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.44}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+
             NumberOnlyField:
-                id:number
-                mode: "rectangle"
+                id:sell_quantity
+                mode: "line"
                 fill_color: 0, 0, 0, .4
                 size_hint: .6, .1
-                hint_text:"Phone number:"
-                pos_hint:{'center_x':.5, 'center_y':.7}
+                hint_text:"Quantity:"
+                pos_hint:{'center_x':.5, 'center_y':.33}
                 text_color: 0, 0, 0, 1
-                font_size: dp(25)
-            MDTextField:
-                id:password
-                mode: "rectangle"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                pos_hint:{'center_x':.5, 'center_y':.55}
-                hint_text:"Password:"
-                text_color: 0, 0, 0, 1
-                font_size: dp(25)
+                font_size: dp(18)
             MDFillRoundFlatButton:
-                id:b_register
-                text: "Verify & Register"
-                size_hint: .5, .06
-                text_color: 1, 1, 1, 1
-                pos_hint:{'center_x':.5, 'center_y':.4}
-                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
+                text: "Sell"
+                size_hint: .4, .06
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                pos_hint:{'center_x':.5, 'center_y':.22}
+                md_bg_color:.8, .9, .8, 1
+                elevation:5
                 on_release:
-                    app.validate_user(number.text, password.text)
+                    app.sell_product(sell_quantity.text)
+
+
+
+    MDScreen:
+        name:'sell'
+        FloatLayout:
+            orientation:'vertical'
+            MDLabel:
+                bold:True
+                text:'Scan Medicine To Sell'
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.5, 'center_y':.85}
+                theme_text_color: "Custom"
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+            MDFillRoundFlatButton:
+                id:scan
+                text: "Scan Medicine"
+                size_hint: .4, .06
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                pos_hint:{'center_x':.5, 'center_y':.75}
+                md_bg_color:.8, .9, .8, 1
+                elevation:5
+                on_release:
+                    app.screen_capture("camera3")
+
+    MDScreen:
+        name:"move"
+        FloatLayout:
+            orientation:'vertical'
+            MDLabel:
+                bold:True
+                text:'No Product Found '
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.5, 'center_y':.85}
+                theme_text_color: "Custom"
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+            MDLabel:
+                text:"Would you like to add it"
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.5, 'center_y':.75}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDFillRoundFlatButton:
+                text: "Add new medicine"
+                size_hint: .4, .06
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                pos_hint:{'center_x':.5, 'center_y':.65}
+                md_bg_color:.8, .9, .8, 1
+                elevation:5
+                on_release:
+                    app.screen_capture("add")
+
+
+    MDScreen:
+        name:'add'
+        on_enter:
+            app.scan_medicine()
+        FloatLayout:
+            orientation:'vertical'
+            MDLabel:
+                bold:True
+                text:'Fill Medicine Information'
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.5, 'center_y':.85}
+                theme_text_color: "Custom"
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+            MDFillRoundFlatButton:
+                id:med
+                text: "Scan Medicine"
+                size_hint: .4, .06
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                pos_hint:{'center_x':.5, 'center_y':.75}
+                md_bg_color:.8, .9, .8, 1
+                elevation:9
+                on_release:
+                    app.screen_capture("camera")
+                    med.pos_hint = {'center_x':1.5, 'center_y':.75}
+                    bar.pos_hint = {'center_x':.75, 'center_y':.75}
+            MDIconButton:
+                id:bar
+                halign:"center"
+                icon:"barcode-scan"
+                user_font_size:"35sp"
+                pos_hint:{'center_x':1.5, 'center_y':.75}
+                on_release:
+                    app.screen_capture("camera")
+            MDLabel:
+                id:product_id
+                text:app.data_id
+                theme_text_color: "Custom"
+                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                halign:"center"
+                pos_hint:{'center_x':.5, 'center_y':.75}
+            MDTextField:
+                id:name
+                mode: "line"
+                fill_color: 0, 0, 0, .4
+                size_hint: .6, .1
+                pos_hint:{'center_x':.5, 'center_y':.64}
+                hint_text:"Name:"
+                text_color: 0, 0, 0, 1
+                font_size: dp(18)
+            NumberOnlyField:
+                id:quantity
+                mode: "line"
+                fill_color: 0, 0, 0, .4
+                size_hint: .6, .1
+                hint_text:"Quantity:"
+                pos_hint:{'center_x':.5, 'center_y':.52}
+                text_color: 0, 0, 0, 1
+                font_size: dp(18)
+            NumberOnlyField:
+                id:price
+                mode: "line"
+                fill_color: 0, 0, 0, .4
+                size_hint: .6, .1
+                hint_text:"Price:"
+                pos_hint:{'center_x':.5, 'center_y':.4}
+                text_color: 0, 0, 0, 1
+                font_size: dp(18)
+            MDRaisedButton:
+                id:exp
+                text: app.date
+                pos_hint:{'center_x':.65, 'center_y':.27}
+                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
+                elevation:9
+                on_release:
+                    app.show_date_picker()
+            MDLabel:
+                id:expired
+                halign:"center"
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, 0.5
+                text:"Expiration Date:"
+                pos_hint:{'center_x':.34, 'center_y':.27}
+            MDFillRoundFlatButton:
+                id:additem
+                text: "Add Item"
+                size_hint: .4, .06
+                text_color: 1, 1, 1, 1
+                pos_hint:{'center_x':.5, 'center_y':.15}
+                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
+                elevation:5
+                on_release:
+                    app.add_medicine(product_id.text, name.text, quantity.text, price.text, exp.text)
 
     MDScreen:
         name:'home'
@@ -79,97 +348,6 @@ ScreenManager
                 pos_hint:{'center_x':.5, 'center_y':.3}
 
 
-
-    MDScreen:
-        name:'add'
-        FloatLayout:
-            orientation:'vertical'
-            MDLabel:
-                bold:True
-                text:'Fill Medicine Information'
-                halign:"center"
-                font_style:'H6'
-                pos_hint:{'center_x':.5, 'center_y':.85}
-                theme_text_color: "Custom"
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                height: self.texture_size[1]
-                width: self.texture_size[1]
-            MDFillRoundFlatButton:
-                id:med
-                text: "Scan Medicine"
-                size_hint: .4, .06
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                pos_hint:{'center_x':.5, 'center_y':.75}
-                md_bg_color:.8, .9, .8, 1
-                elevation:5
-                on_release:
-                    app.screen_capture("camera")
-                    med.pos_hint = {'center_x':1.5, 'center_y':.75}
-                    bar.pos_hint = {'center_x':.75, 'center_y':.75}
-            MDIconButton:
-                id:bar
-                halign:"center"
-                icon:"barcode-scan"
-                user_font_size:"35sp"
-                pos_hint:{'center_x':1.5, 'center_y':.75}
-                on_release:
-                    app.screen_capture("camera")
-
-            MDLabel:
-                text:app.data_id
-                theme_text_color: "Custom"
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                halign:"center"
-                pos_hint:{'center_x':.5, 'center_y':.75}
-
-
-            MDTextField:
-                id:name
-                mode: "line"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                pos_hint:{'center_x':.5, 'center_y':.64}
-                hint_text:"Name:"
-                text_color: 0, 0, 0, 1
-                font_size: dp(18)
-            NumberOnlyField:
-                id:quantity
-                mode: "line"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                hint_text:"Quantity:"
-                pos_hint:{'center_x':.5, 'center_y':.52}
-                text_color: 0, 0, 0, 1
-                font_size: dp(18)
-            NumberOnlyField:
-                id:price
-                mode: "line"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                hint_text:"Price:"
-                pos_hint:{'center_x':.5, 'center_y':.4}
-                text_color: 0, 0, 0, 1
-                font_size: dp(18)
-            MDTextField:
-                id:exp
-                mode: "line"
-                fill_color: 0, 0, 0, .4
-                size_hint: .6, .1
-                pos_hint:{'center_x':.5, 'center_y':.27}
-                hint_text:"Expiration Date:"
-                helper_text:"21/12/2000"
-                helper_text_mode:"on_focus"
-                text_color: 0, 0, 0, 1
-                font_size: dp(18)
-            MDFillRoundFlatButton:
-                id:additem
-                text: "Add Item"
-                size_hint: .4, .06
-                text_color: 1, 1, 1, 1
-                pos_hint:{'center_x':.5, 'center_y':.15}
-                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
-
-
     MDScreen:
         name:"camera"
         on_enter:
@@ -202,10 +380,27 @@ ScreenManager
                 id:preview2
 
             MDLabel:
-                id:ti
+                id:t2
                 size_hint_y: None
                 height: "130dp"
 
+    MDScreen:
+        name:"camera3"
+        on_enter:
+            app.on_kv_post3()
+        on_leave:
+            app.stop_camera3()
+        BoxLayout:
+            orientation: "vertical"
+            Scan_Analyze:
+                aspect_ratio: "16:9"
+                extracted_data:app.search_result
+                id:preview3
+
+            MDLabel:
+                id:ti
+                size_hint_y: None
+                height: "130dp"
 
     MDScreen:
         name:'search'
@@ -251,7 +446,7 @@ ScreenManager
                 md_bg_color:.8, .9, .8, 1
                 elevation:5
                 on_release:
-                    app.screen_capture("test")
+                    app.search_medicine(app.data_id)
             MDLabel:
                 text:app.data_id
                 theme_text_color: "Custom"
@@ -261,7 +456,7 @@ ScreenManager
 
 
     MDScreen:
-        name:'test'
+        name:"result"
         FloatLayout:
             orientation:'vertical'
             MDLabel:
@@ -278,7 +473,7 @@ ScreenManager
                 text:"Name"
                 halign:"center"
                 font_style:'H6'
-                pos_hint:{'center_x':.3, 'center_y':.64}
+                pos_hint:{'center_x':.3, 'center_y':.74}
                 height: self.texture_size[1]
                 width: self.texture_size[1]
                 theme_text_color: "Custom"
@@ -287,7 +482,7 @@ ScreenManager
                 text:"Quantity"
                 halign:"center"
                 font_style:'H6'
-                pos_hint:{'center_x':.3, 'center_y':.52}
+                pos_hint:{'center_x':.3, 'center_y':.64}
                 height: self.texture_size[1]
                 width: self.texture_size[1]
                 theme_text_color: "Custom"
@@ -296,7 +491,7 @@ ScreenManager
                 text:"Price"
                 halign:"center"
                 font_style:'H6'
-                pos_hint:{'center_x':.3, 'center_y':.4}
+                pos_hint:{'center_x':.3, 'center_y':.54}
                 height: self.texture_size[1]
                 width: self.texture_size[1]
                 theme_text_color: "Custom"
@@ -305,12 +500,53 @@ ScreenManager
                 text:"Expiration Date"
                 halign:"center"
                 font_style:'H6'
-                pos_hint:{'center_x':.3, 'center_y':.27}
+                pos_hint:{'center_x':.3, 'center_y':.44}
                 height: self.texture_size[1]
                 width: self.texture_size[1]
                 theme_text_color: "Custom"
                 text_color: 0, 0, 0, .4
-
+            MDSeparator:
+                orientation:"vertical"
+                pos_hint:{"center_x":.5, "center_y":.6}
+                color:80 / 225, 136 / 225, 114 / 225, 1
+                width:1
+                size_hint:None, .25
+            MDLabel:
+                text:app.sname
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.74}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:app.squantity
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.64}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:app.sprice
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.54}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:app.sexpire
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.7, 'center_y':.44}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
 
     MDScreen:
         name:'verify'
@@ -335,7 +571,7 @@ ScreenManager
                 pos_hint:{'center_x':.5, 'center_y':.7}
                 text_color: 0, 0, 0, 1
                 font_size: dp(25)
-            MDRoundFlatButton:
+            MDFillRoundFlatButton:
                 id:ver
                 text: "Verify"
                 size_hint: .4, .06
@@ -343,6 +579,7 @@ ScreenManager
                 md_bg_color: 83 / 225, 186 / 225, 115 / 225, 1
                 on_release:
                     app.verify(numberv.text)
+
 
 
     MDScreen:

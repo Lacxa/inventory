@@ -1,24 +1,5 @@
 from datetime import datetime
 
-import firebase_admin
-
-firebase_admin._apps.clear()
-from firebase_admin import credentials, initialize_app, db
-
-if not firebase_admin._apps:
-    cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
-    initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-    ref = db.reference('Register').child("phone")
-    print("New Start")
-    ref.set(
-        {
-            "user_phone": "0714069084",
-            "pasword": "kkk",
-
-        }
-    )
-    print("Done")
-
 
 class Transfer:
     current_time = str(datetime.now())
@@ -32,7 +13,7 @@ class Transfer:
     number = 0
     order_id = '123'
 
-    def register(self, phone, name):
+    def register(self, product_id, name, quantity, price, exp):
         if True:
             import firebase_admin
             firebase_admin._apps.clear()
@@ -40,21 +21,49 @@ class Transfer:
             if not firebase_admin._apps:
                 cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
                 initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-                print("Starting deployment....", int(phone))
+                ref = db.reference('Inventory').child('Shop').child("Products").child(product_id)
+                print("uploaded")
+                ref.set(
+                    {
+                        "name": name,
+                        "quantity": quantity,
+                        "price": price,
+                        "expiration_date": exp,
+                    }
+                )
+    def upd(self, product_id, sell):
+        if True:
+            import firebase_admin
+            firebase_admin._apps.clear()
+            from firebase_admin import credentials, initialize_app, db
+            if not firebase_admin._apps:
+                cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                ref = db.reference('Inventory').child('Shop').child("Products").child(product_id)
+                print("uploaded")
+                ref.update(
+                    {
+                        "quantity": sell,
+                    }
+                )
 
-                ref = db.reference('Inventory').child('Users')
-                users = ref.get()
-                if phone in users:
-                    print('It there')
-                else:
-                    ref = db.reference('Inventory').child("Users").child(phone)
-                    print("horray!!!")
-                    ref.set(
-                        {
-                            'user_name': name,
-                            'phone': phone,
 
-                        })
+    def fetch_medicine(self, product_id):
+        if True:
+            import firebase_admin
+            firebase_admin._apps.clear()
+            from firebase_admin import credentials, initialize_app, db
+            try:
+                if not firebase_admin._apps:
+                    cred = credentials.Certificate(
+                        "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                    initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                    ref = db.reference('Inventory').child('Shop').child("Products").child(product_id)
+                    data = ref.get()
+                    print(data)
+                    return data
+            except:
+                return False
 
-
-#Transfer.register(Transfer(), "0714069014", "123")
+    def hello(self):
+        pass

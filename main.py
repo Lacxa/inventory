@@ -12,8 +12,12 @@ from kivymd.uix.textfield import MDTextField
 from phonenumbers import carrier
 from phonenumbers.phonenumberutil import number_type
 from pyzbar.pyzbar import decode
+from kivymd.uix.picker import MDDatePicker
+
+from database import Transfer as TR
 
 Window.size = [420, 740]
+
 
 class Scan_Analyze(Preview):
     extracted_data = ObjectProperty(None)
@@ -35,21 +39,18 @@ class NumberOnlyField(MDTextField):
 
     def insert_text(self, substring, from_undo=False):
 
-        pat = self.pat
+        if len(self.text) == 0 and substring == "0":
+            return
 
-        if "." in self.text:
-            s = re.sub(pat, "", substring)
+        if not substring.isdigit():
+            return
 
-        else:
-            s = ".".join([re.sub(pat, "", s) for s in substring.split(".", 1)])
-
-        return super(NumberOnlyField, self).insert_text(s, from_undo=from_undo)
+        return super(NumberOnlyField, self).insert_text(substring, from_undo=from_undo)
 
 
 class MainApp(MDApp):
     user_pin = StringProperty('')
     size_x, size_y = Window.size
-
 
     # APP
     screens = ['entrance']
@@ -64,10 +65,18 @@ class MainApp(MDApp):
     data_id = StringProperty("")
 
     # Medicine
-    name = StringProperty("")
-    quantity = StringProperty("")
-    price = StringProperty("")
-    expire = StringProperty("")
+    name = StringProperty("......................")
+    quantity = StringProperty("......................")
+    price = StringProperty("......................")
+    expire = StringProperty("......................")
+    sell = StringProperty("")
+
+    sname = StringProperty("")
+    squantity = StringProperty("")
+    sprice = StringProperty("")
+    sexpire = StringProperty("")
+
+    date = StringProperty("Open date picker")
 
     @mainthread
     def on_kv_post(self):
@@ -83,6 +92,12 @@ class MainApp(MDApp):
     def stop_camera2(self):
         self.root.ids.preview2.disconnect_camera()
 
+    @mainthread
+    def on_kv_post3(self):
+        self.root.ids.preview3.connect_camera(enable_analyze_pixels=True, default_zoom=0.0)
+
+    def stop_camera3(self):
+        self.root.ids.preview3.disconnect_camera()
 
     @mainthread
     def got_result(self, result):
@@ -117,6 +132,22 @@ class MainApp(MDApp):
                 self.data_id = idd
                 print(self.data_id)
                 self.screen_capture("search")
+            else:
+                toast("show barcode")
+        self.root.ids.ti.text = str(result)
+
+    @mainthread
+    def search_result(self, result):
+        idd = str(result.data)
+        type = str(result.type)
+        sm = self.root
+        if idd:
+            idd = idd.replace("b", "")
+            idd = idd.replace("'", "")
+            if type != "QRCODE":
+                self.data_id = idd
+                print(self.data_id)
+                self.search_medicines(self.data_id)
             else:
                 toast("show barcode")
         self.root.ids.ti.text = str(result)
@@ -176,12 +207,91 @@ class MainApp(MDApp):
             toast("enter phone number!")
 
     def register_caller(self, phone, name):
-        from database import Transfer as TR
         try:
             TR.register(TR(), phone, name)
             self.screen_capture("home")
         except:
             toast('OPPs!, No connection')
+
+    def add_medicine(self, product_id, name, quantity, price, exp):
+        dates = self.date
+        if product_id is "":
+            toast("Please scan medicine first")
+        elif name == "":
+            toast("Please enter name")
+        elif quantity == "":
+            toast("Please enter quantity")
+        elif price == "":
+            toast("Please enter price")
+        elif exp == dates == "Open date picker":
+            toast("please pick expiration date")
+        else:
+
+            from database import Transfer as TR
+            try:
+                TR.register(TR(), product_id, name, quantity, price, exp)
+                toast("Medicine Added successfully")
+            except:
+                toast("No network")
+
+    def search_medicine(self, product_id):
+        if TR.fetch_medicine(TR(), product_id):
+            data = TR.fetch_medicine(TR(), product_id)
+            self.sexpire = data['expiration_date']
+            self.sname = data['name']
+            self.sprice = data['price']
+            self.squantity = data['quantity']
+            self.screen_capture("result")
+
+        else:
+            toast("No Product Found")
+
+    def search_medicines(self, product_id):
+        if TR.fetch_medicine(TR(), product_id):
+            data = TR.fetch_medicine(TR(), product_id)
+            self.sexpire = data['expiration_date']
+            self.sname = data['name']
+            self.sprice = data['price']
+            self.squantity = data['quantity']
+            self.screen_capture("availability")
+
+        else:
+            self.screen_capture("move")
+
+    def tes2(self, sell):
+
+        TR.upd(TR(), self.data_id, sell)
+
+    def sell_product(self, sell_quantity):
+        self.sell = self.squantity
+
+        print(sell_quantity, self.sell)
+
+        if int(sell_quantity) > int(self.sell):
+            toast("Enter valid quantity")
+
+        else:
+            self.sell = str(int(self.sell) - int(sell_quantity))
+            self.tes2(self.sell)
+            self.squantity = self.sell
+            toast("sell a success")
+
+    def on_save(self, instance, value, date_ranges):
+        self.date = str(value)
+
+    def on_cancel(self, instance, value):
+        '''Events called when the "CANCEL" dialog box button is clicked.'''
+
+    def show_date_picker(self):
+        self.theme_cls.primary_palette = "Blue"
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+
+    def scan_medicine(self, ):
+        if self.data_id != "":
+            button = self.root.ids.med
+            button.pos_hint = {'center_x': 1.5, 'center_y': .75}
 
     def screen_capture(self, screen):
         sm = self.root
