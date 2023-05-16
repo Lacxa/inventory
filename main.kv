@@ -1,21 +1,27 @@
 #:import sm kivy.uix.screenmanager
 
-
+#pos_hint:{'center_x':.9, 'center_y':.95}
 ScreenManager
     id:manager
     transition:sm.FadeTransition(duration=.0)
+
+
     MDScreen:
         name:'home'
         FloatLayout:
             orientation:'vertical'
             MDIconButton:
-                icon:"magnify"
-                user_font_size:"50sp"
-                pos_hint:{'center_x':.9, 'center_y':.95}
-                theme_text_color: "Custom"
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                icon:"segment"
+                pos_hint:{"center_x":.9,"center_y":.95}
+                user_font_size:"35"
                 on_release:
-                    app.screen_capture("search")
+                    app.screen_capture("info")
+            #MDToolbar:
+             #   specific_text_color:78/255, 82/255, 84/255, 1
+              #  md_bg_color:1, 1, 1, 1
+               # right_action_items: [["segment", lambda x:  app.screen_capture('info')]]
+                #pos_hint:{'center_y':.95}
+
             Front:
                 pos_hint:{'center_x':.5, 'center_y':.7}
                 MDIconButton:
@@ -29,7 +35,7 @@ ScreenManager
             MDLabel:
                 halign:"center"
                 text:"Add Medicine"
-                pos_hint:{'center_x':.5, 'center_y':.6}
+                pos_hint:{'center_x':.5, 'center_y':.58}
             Front:
                 pos_hint:{'center_x':.5, 'center_y':.4}
                 MDIconButton:
@@ -42,8 +48,42 @@ ScreenManager
 
             MDLabel:
                 halign:"center"
-                text:"Search Medicine"
-                pos_hint:{'center_x':.5, 'center_y':.3}
+                text:"Sell Medicine"
+                pos_hint:{'center_x':.5, 'center_y':.28}
+
+    MDScreen:
+        name:"share"
+        FloatLayout:
+            MDTextField:
+                id:username
+                mode: "rectangle"
+                #fill_color: 0, 0, 0, .4
+                size_hint: .6, .1
+                pos_hint:{'center_x':.5, 'center_y':.8}
+                hint_text:"Share, phone number"
+                #text_color: 1, 1, 1, 1
+                font_size: dp(25)
+            Deco:
+                pos_hint:{"center_x":.5,"center_y":.6}
+                md_bg_color: .35, .35, .35, 1
+                elevation: 7
+                size: app.size_x/1.2, app.size_y/7
+                MDLabel:
+                    id:test
+                    text:"jiji"
+                    halign:"center"
+                    font_size: "20sp"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    pos_hint:{"center_x":.5,"center_y":.5}
+
+            MDRaisedButton:
+                text: "Send"
+                pos_hint:{'center_x': .5, 'center_y': .45}
+                font_size: "18sp"
+                md_bg_color: 36/255, 146/255, 255/255, 1
+                on_release:
+                    app.send_txt(username.text, test)
 
     MDScreen:
         name:"availability"
@@ -148,15 +188,37 @@ ScreenManager
                 pos_hint:{'center_x':.5, 'center_y':.33}
                 text_color: 0, 0, 0, 1
                 font_size: dp(18)
+                on_text:
+                    app.Total(sell_quantity.text)
+            MDLabel:
+                text:"Total price:"
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.3, 'center_y':.22}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
+            MDLabel:
+                text:app.total
+                halign:"center"
+                font_style:'H6'
+                pos_hint:{'center_x':.56, 'center_y':.22}
+                height: self.texture_size[1]
+                width: self.texture_size[1]
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, .4
             MDFillRoundFlatButton:
                 text: "Sell"
                 size_hint: .4, .06
                 text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                pos_hint:{'center_x':.5, 'center_y':.22}
+                pos_hint:{'center_x':.5, 'center_y':.11}
                 md_bg_color:.8, .9, .8, 1
                 elevation:5
                 on_release:
                     app.sell_product(sell_quantity.text)
+
+
 
 
 
@@ -293,7 +355,7 @@ ScreenManager
                 id:exp
                 text: app.date
                 pos_hint:{'center_x':.65, 'center_y':.27}
-                md_bg_color:80 / 225, 136 / 225, 114 / 225, 1
+                md_bg_color: 80/255, 136/255, 114/255, 1
                 elevation:9
                 on_release:
                     app.show_date_picker()
@@ -314,38 +376,6 @@ ScreenManager
                 elevation:5
                 on_release:
                     app.add_medicine(product_id.text, name.text, quantity.text, price.text, exp.text)
-
-    MDScreen:
-        name:'home'
-        FloatLayout:
-            orientation:'vertical'
-            Front:
-                pos_hint:{'center_x':.5, 'center_y':.7}
-                MDIconButton:
-                    icon:"plus"
-                    user_font_size:"100sp"
-                    theme_text_color: "Custom"
-                    text_color: 1, 1, 1,
-                    on_release:
-                        app.screen_capture("add")
-
-            MDLabel:
-                halign:"center"
-                text:"Add Medicine"
-                pos_hint:{'center_x':.5, 'center_y':.6}
-            Front:
-                pos_hint:{'center_x':.5, 'center_y':.4}
-                MDIconButton:
-                    icon:"magnify"
-                    user_font_size:"100sp"
-                    theme_text_color: "Custom"
-                    text_color: 1, 1, 1, 1
-                    on_release:
-                        app.screen_capture("search")
-            MDLabel:
-                halign:"center"
-                text:"Search Medicine"
-                pos_hint:{'center_x':.5, 'center_y':.3}
 
 
     MDScreen:
@@ -401,60 +431,6 @@ ScreenManager
                 id:ti
                 size_hint_y: None
                 height: "130dp"
-
-    MDScreen:
-        name:'search'
-        FloatLayout:
-            orientation:'vertical'
-            MDLabel:
-                bold:True
-                text:'Search Medicine Information'
-                halign:"center"
-                font_style:'H6'
-                pos_hint:{'center_x':.5, 'center_y':.85}
-                theme_text_color: "Custom"
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                height: self.texture_size[1]
-                width: self.texture_size[1]
-            MDFillRoundFlatButton:
-                id:scan
-                text: "Scan Medicine"
-                size_hint: .4, .06
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                pos_hint:{'center_x':.5, 'center_y':.75}
-                md_bg_color:.8, .9, .8, 1
-                elevation:5
-                on_release:
-                    app.screen_capture("camera2")
-                    scan.pos_hint = {'center_x':1.5, 'center_y':.75}
-                    code.pos_hint = {'center_x':.75, 'center_y':.75}
-                    search.pos_hint = {'center_x':.5, 'center_y':.64}
-            MDIconButton:
-                id:code
-                halign:"center"
-                icon:"barcode-scan"
-                user_font_size:"35sp"
-                pos_hint:{'center_x':1.5, 'center_y':.75}
-                on_release:
-                    app.screen_capture("camera2")
-            MDFillRoundFlatButton:
-                id:search
-                text: "Search"
-                size_hint: .4, .06
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                pos_hint:{'center_x':1.5, 'center_y':.64}
-                md_bg_color:.8, .9, .8, 1
-                elevation:5
-                on_release:
-                    app.search_medicine(app.data_id)
-            MDLabel:
-                text:app.data_id
-                theme_text_color: "Custom"
-                text_color: 80 / 225, 136 / 225, 114 / 225, 1
-                halign:"center"
-                pos_hint:{'center_x':.5, 'center_y':.75}
-
-
     MDScreen:
         name:"result"
         FloatLayout:
@@ -580,6 +556,82 @@ ScreenManager
                 on_release:
                     app.verify(numberv.text)
 
+    MDScreen:
+        name:"info"
+        MDBoxLayout:
+            orientation:"vertical"
+            MDToolbar:
+                title: "Quick Info"
+                specific_text_color:78/255, 82/255, 84/255, 1
+                md_bg_color:1, 1, 1, 1
+            MDTabs:
+                allow_stretch:False
+                background_color:1, 1, 1, 1
+                indicator_color:128/255, 0/255, 0/255, .4
+                tab_hint_x:True
+                text_color_active:78/255, 82/255, 84/255, 1
+                text_color_normal:.5, .5, .5, 1
+
+                Tab:
+                    title: "Search medicine"
+                    FloatLayout:
+                        orientation:'vertical'
+                        MDLabel:
+                            bold:True
+                            text:'Search Medicine Information'
+                            halign:"center"
+                            font_style:'H6'
+                            pos_hint:{'center_x':.5, 'center_y':.85}
+                            theme_text_color: "Custom"
+                            text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                            height: self.texture_size[1]
+                            width: self.texture_size[1]
+                        MDFillRoundFlatButton:
+                            id:scan
+                            text: "Scan Medicine"
+                            size_hint: .4, .06
+                            text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                            pos_hint:{'center_x':.5, 'center_y':.75}
+                            md_bg_color:.8, .9, .8, 1
+                            elevation:5
+                            on_release:
+                                app.screen_capture("camera2")
+                                scan.pos_hint = {'center_x':.5, 'center_y':2}
+                                code.pos_hint = {'center_x':.75, 'center_y':.75}
+                                search.pos_hint = {'center_x':.5, 'center_y':.64}
+                        MDIconButton:
+                            id:code
+                            halign:"center"
+                            icon:"barcode-scan"
+                            user_font_size:"35sp"
+                            pos_hint:{'center_x':.5, 'center_y':2}
+                            on_release:
+                                app.screen_capture("camera2")
+                        MDFillRoundFlatButton:
+                            id:search
+                            text: "Search"
+                            size_hint: .4, .06
+                            text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                            pos_hint:{'center_x':.5, 'center_y':2}
+                            md_bg_color:.8, .9, .8, 1
+                            elevation:5
+                            on_release:
+                                app.search_medicine(app.data_id)
+                        MDLabel:
+                            text:app.data_id
+                            theme_text_color: "Custom"
+                            text_color: 80 / 225, 136 / 225, 114 / 225, 1
+                            halign:"center"
+                            pos_hint:{'center_x':.5, 'center_y':.75}
+
+                Tab:
+                    title: "Report"
+                    FloatLayout:
+
+                Tab:
+                    title: "Transaction History"
+                    FloatLayout:
+
 
 
     MDScreen:
@@ -615,6 +667,19 @@ ScreenManager
                 theme_text_color: "Custom"
                 text_color: 1, 1, 1, 1
 
+
+<Deco@MDCard>:
+    orientation: "vertical"
+    md_bg_color: 1, 1, 1, 1
+    padding: "10dp"
+    #spacing: "5dp"
+    border_radius: 3
+    border_color_a: .5
+    radius: [9]
+    size_hint: None, None
+    size: app.size_x/1, app.size_y/2.5
+    focus_behavior: False
+    ripple_behavior: False
 
 <Front@MDBoxLayout>:
     radius:20

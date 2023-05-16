@@ -1,5 +1,9 @@
 from datetime import datetime
 
+from kivymd.toast import toast
+
+import network
+
 
 class Transfer:
     current_time = str(datetime.now())
@@ -14,7 +18,7 @@ class Transfer:
     order_id = '123'
 
     def register(self, product_id, name, quantity, price, exp):
-        if True:
+        if network.ping_net():
             import firebase_admin
             firebase_admin._apps.clear()
             from firebase_admin import credentials, initialize_app, db
@@ -31,8 +35,13 @@ class Transfer:
                         "expiration_date": exp,
                     }
                 )
+            return True
+
+        else:
+            toast("No internet")
+
     def upd(self, product_id, sell):
-        if True:
+        if network.ping_net():
             import firebase_admin
             firebase_admin._apps.clear()
             from firebase_admin import credentials, initialize_app, db
@@ -47,23 +56,98 @@ class Transfer:
                     }
                 )
 
+        else:
+            toast("No internet")
 
     def fetch_medicine(self, product_id):
-        if True:
+        if network.ping_net():
             import firebase_admin
             firebase_admin._apps.clear()
             from firebase_admin import credentials, initialize_app, db
-            try:
-                if not firebase_admin._apps:
-                    cred = credentials.Certificate(
-                        "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
-                    initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-                    ref = db.reference('Inventory').child('Shop').child("Products").child(product_id)
-                    data = ref.get()
-                    print(data)
-                    return data
-            except:
-                return False
+            if not firebase_admin._apps:
+                cred = credentials.Certificate(
+                    "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                ref = db.reference('Inventory').child('Shop').child("Products")
+                data = ref.get()
 
-    def hello(self):
-        pass
+                if product_id in data:
+
+                    return data[product_id]
+                else:
+
+                    return "nodata"
+        else:
+            toast("No internet")
+
+    def get_sell(self, p_i):
+            import firebase_admin
+            firebase_admin._apps.clear()
+            from firebase_admin import credentials, initialize_app, db
+            if not firebase_admin._apps:
+                cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                try:
+                    ref = db.reference('Inventory').child('Shop').child("History").child(self.year()).child(self.month_date())
+                    data = ref.get()
+
+                    if p_i in data:
+                        sell = data[p_i]["sell"]
+                        total = data[p_i]["total"]
+
+                        return [sell, total]
+                    else:
+
+                        return False
+                except:
+
+                    return False
+
+
+    def history(self, p_i, sell, total):
+            import firebase_admin
+            firebase_admin._apps.clear()
+            from firebase_admin import credentials, initialize_app, db
+            if not firebase_admin._apps:
+                cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                sells = self.get_sell(p_i)
+                if sells:
+                    sell_new = str(int(sells[0]) + int(sell))
+                    total_new = str(int(sells[1]) + int(total))
+
+                    ref = db.reference('Inventory').child('Shop').child("History").child(self.year()).child(self.month_date()).child(p_i)
+
+                    ref.update(
+                        {
+                            "sell": sell_new,
+                            "total": total_new
+
+                        }
+                    )
+                else:
+                    ref = db.reference('Inventory').child('Shop').child("History").child(self.year()).child(
+                        self.month_date()).child(p_i)
+
+                    ref.set(
+                        {
+                            "sell": sell,
+                            "total": total
+
+                        }
+                    )
+
+
+    def year(self):
+        current_time = str(datetime.now())
+        date, time = current_time.strip().split()
+        y, m, d = date.strip().split("-")
+
+        return y
+
+    def month_date(self):
+        current_time = str(datetime.now())
+        date, time = current_time.strip().split()
+        y, m, d = date.strip().split("-")
+
+        return f"{m}_{d}"
