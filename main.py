@@ -260,6 +260,7 @@ class MainApp(MDApp):
                 else:
                     toast("No internet")
 
+
     def search_medicine(self, product_id):
         if network.ping_net():
             data = TR.fetch_medicine(TR(), product_id)

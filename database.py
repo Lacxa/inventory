@@ -136,6 +136,7 @@ class Transfer:
                         }
                     )
 
+
     def fetch_history(self, year, datep):
         import firebase_admin
         firebase_admin._apps.clear()
