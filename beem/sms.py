@@ -15,22 +15,20 @@ def phone_repr(phone):
         return public_number
 
 
-def send_sms(phone, location, phone_company, product, quantity):
+def send_sms(phone, product):
     URL = 'https://apisms.beem.africa/v1/send'
     content_type = 'application/json'
     source_addr = 'INVENTORY'
     secrete_key = "YmE1NmRmNzVmY2JhN2RjYmI0ZGU1OTJlMzFlNWU4MDdhYzQ2MWNlNWVmZDVkNWFkNzYxOWUyNjRmNGNmYmNiNQ=="
     api_key = 'b7a0b864387611b6'
-    phonee = phone_repr(phone_company)
+    phonee = phone_repr(phone)
     apikey_and_apisecret = api_key + ':' + secrete_key
 
     first_request = requests.post(url=URL, data=json.dumps({
         'source_addr': 'INVENTORY',
         'schedule_time': '',
         'encoding': '0',
-        'message': f'Your product pid{phone}, '
-                   f'product name {product}, quantity {quantity} '
-                   f'is nearly to expire {location}',
+        'message': f'product name {product}, product id  ''product is near expire',
         'recipients': [
             {
                 'recipient_id': 1,
@@ -49,4 +47,6 @@ def send_sms(phone, location, phone_company, product, quantity):
     print(first_request.json())
     return (first_request.json())
 
-send_sms('0714069014', 'product is near expire', '0714069014', 'jg', '5')
+
+
+#send_sms('0715700411', 'Albendazol', '6754764799',)

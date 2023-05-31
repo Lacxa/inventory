@@ -60,7 +60,6 @@ class Transfer:
             toast("No internet")
 
     def fetch_medicine(self, product_id):
-        if network.ping_net():
             import firebase_admin
             firebase_admin._apps.clear()
             from firebase_admin import credentials, initialize_app, db
@@ -77,8 +76,6 @@ class Transfer:
                 else:
 
                     return "nodata"
-        else:
-            toast("No internet")
 
     def get_sell(self, p_i):
             import firebase_admin
@@ -104,7 +101,7 @@ class Transfer:
                     return False
 
 
-    def history(self, p_i, sell, total):
+    def history(self, p_i, name, sell, total):
             import firebase_admin
             firebase_admin._apps.clear()
             from firebase_admin import credentials, initialize_app, db
@@ -120,6 +117,7 @@ class Transfer:
 
                     ref.update(
                         {
+                            "Name": name,
                             "sell": sell_new,
                             "total": total_new
 
@@ -131,11 +129,36 @@ class Transfer:
 
                     ref.set(
                         {
+                            "Name": name,
                             "sell": sell,
                             "total": total
 
                         }
                     )
+
+    def fetch_history(self, year, datep):
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Inventory').child('Shop').child("History").child(year).child(datep)
+            data = ref.get()
+
+            return data
+    def get_medicine(self):
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(
+                "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Inventory').child('Shop').child("Products")
+            data = ref.get()
+
+            return data
 
 
     def year(self):
@@ -151,3 +174,6 @@ class Transfer:
         y, m, d = date.strip().split("-")
 
         return f"{m}_{d}"
+
+
+#Transfer.fetch_history(Transfer(), "2023", "05_11")

@@ -4,6 +4,7 @@ import phonenumbers
 from PIL import Image
 from kivy import utils
 
+import network
 from beem import sms as SM
 from beem import OTP as tp
 from camera4kivy import Preview
@@ -86,6 +87,9 @@ class MainApp(MDApp):
 
     # QR data
     data_id = StringProperty("")
+    get_id = StringProperty("")
+    s_id = StringProperty("")
+
 
     # Medicine
     name = StringProperty("......................")
@@ -93,9 +97,14 @@ class MainApp(MDApp):
     price = StringProperty("......................")
     expire = StringProperty("......................")
 
+    selected_date = StringProperty("Open date picker")
+    year = StringProperty("")
+    datep = StringProperty("")
+
     sales = StringProperty("")
     sell = StringProperty("")
     total = StringProperty("---")
+
 
     sname = StringProperty("")
     squantity = StringProperty("")
@@ -144,38 +153,37 @@ class MainApp(MDApp):
 
     @mainthread
     def get_result(self, result):
-        idd = str(result.data)
+        Search_id = str(result.data)
         type = str(result.type)
         sm = self.root
-        if idd:
-            idd = idd.replace("b", "")
-            idd = idd.replace("'", "")
+        if Search_id:
+            Search_id = Search_id.replace("b", "")
+            Search_id = Search_id.replace("'", "")
             if type != "QRCODE":
-                self.data_id = idd
-                print(self.data_id)
-                self.screen_capture("info")
+                self.get_id = Search_id
+                print(self.get_id)
+                self.screen_capture("search")
             else:
                 toast("show barcode")
-        self.root.ids.ti.text = str(result)
+        self.root.ids.t2.text = str(result)
 
     @mainthread
     def search_result(self, result):
-        idd = str(result.data)
+        sell_id = str(result.data)
         type = str(result.type)
         sm = self.root
-        if idd:
-            idd = idd.replace("b", "")
-            idd = idd.replace("'", "")
+        if sell_id:
+            sell_id = sell_id.replace("b", "")
+            sell_id = sell_id.replace("'", "")
             if type != "QRCODE":
-                self.data_id = idd
-                print(self.data_id)
-                self.search_medicines(self.data_id)
+                self.s_id = sell_id
+                print(self.s_id)
+                self.sell_medicine(self.s_id)
             else:
                 toast("show barcode")
-        self.root.ids.ti.text = str(result)
+        self.root.ids.t2.text = str(result)
 
     def build(self):
-
         pass
 
     def remember_me(self, phone, dust, name):
@@ -248,27 +256,23 @@ class MainApp(MDApp):
             else:
                 if TR.register(TR(), product_id, name, quantity, price, exp):
                     toast("Medicine Added successfully")
+                    self.display_medicine()
                 else:
                     toast("No internet")
 
-
     def search_medicine(self, product_id):
+        if network.ping_net():
             data = TR.fetch_medicine(TR(), product_id)
             if data:
-                self.sexpire = data['expiration_date']
-                self.sname = data['name']
-                self.sprice = data['price']
-                self.squantity = data['quantity']
-                self.screen_capture("result")
+                self.expire = data['expiration_date']
+                self.name = data['name']
+                self.price = data['price']
+                self.quantity = data['quantity']
+        else:
+            toast("No internet")
 
-            elif data == "nodata":
-                toast("No Product Found")
-
-            else:
-                toast("No internet!")
-
-
-    def search_medicines(self, product_id):
+    def sell_medicine(self, product_id):
+        if network.ping_net():
             data = TR.fetch_medicine(TR(), product_id)
             if data:
                 self.sexpire = data['expiration_date']
@@ -279,10 +283,12 @@ class MainApp(MDApp):
 
             else:
                 self.screen_capture("move")
+        else:
+            toast("No internet")
 
 
     def tes2(self, sell):
-        TR.upd(TR(), self.data_id, sell)
+        TR.upd(TR(), self.s_id, sell)
 
     def sell_product(self, sell_quantity):
         self.sell = self.squantity
@@ -292,6 +298,12 @@ class MainApp(MDApp):
         if int(sell_quantity) > int(self.sell):
             toast("Enter valid quantity")
 
+        elif sell_quantity == "":
+            toast("Enter valid quantity")
+
+        elif self.total == "":
+            toast("Fill quantity")
+
         else:
             self.sell = str(int(self.sell) - int(sell_quantity))
             self.tes2(self.sell)
@@ -300,14 +312,24 @@ class MainApp(MDApp):
             toast("sell a success")
 
     def Total(self, sell_quantity):
-        if sell_quantity != "":
+        if sell_quantity == "":
+            self.total = ""
+
+        elif sell_quantity != "":
             self.total = str(int(sell_quantity) * int(self.sprice))
 
     def transaction_history(self, ):
-        TR.history(TR(), self.data_id, self.sales, self.total)
+        TR.history(TR(), self.s_id, self.sname, self.sales, self.total)
 
     def on_save(self, instance, value, date_ranges):
         self.date = str(value)
+
+    def on_savu(self, instance, value, date_ranges):
+        self.selected_date = str(value)
+        two = self.selected_date.strip().split('-')
+        self.year = (f"{two[0]}")
+        self.datep = (f"{two[1]}_{two[2]}")
+        self.display_history()
 
     def on_cancel(self, instance, value):
         '''Events called when the "CANCEL" dialog box button is clicked.'''
@@ -316,6 +338,12 @@ class MainApp(MDApp):
         self.theme_cls.primary_palette = "Blue"
         date_dialog = MDDatePicker()
         date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+
+    def select_date_picker(self):
+        self.theme_cls.primary_palette = "Blue"
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_savu, on_cancel=self.on_cancel)
         date_dialog.open()
 
     def scan_medicine(self, ):
@@ -337,20 +365,13 @@ class MainApp(MDApp):
         print(f'current screen {screen}')
 
 
-    def send_txt(self, phone, sms):
-
-        if SM.send_sms(phone, sms):
-            toast("send successful")
-        else:
-            toast("check number!")
-
-
     def on_start(self):
         self.keyboard_hooker()
         #self.request_android_permissions()
 
     def keyboard_hooker(self, *args):
         EventLoop.window.bind(on_keyboard=self.hook_keyboard)
+        self.display_medicine()
 
     def hook_keyboard(self, window, key, *largs):
         print(self.screens_size)
@@ -375,6 +396,54 @@ class MainApp(MDApp):
         self.screens_size = len(self.screens) - 1
         self.current = self.screens[len(self.screens) - 1]
         self.screen_capture(self.current)
+
+    def display_history(self):
+        if network.ping_net():
+            self.root.ids.attendi.data = {}
+            history = TR.fetch_history(TR(), self.year, self.datep)
+
+            if not history:
+                self.root.ids.attendi.data.append(
+                    {
+                        "viewclass": "Notransaction",
+                        "name": "No history available!",
+                    }
+                )
+            else:
+                for i, y in history.items():
+                    self.root.ids.attendi.data.append(
+                        {
+                            "viewclass": "Transaction",
+                            "name": y["Name"],
+                            "sell": y["sell"],
+                            "total": y["total"]
+
+                        }
+                    )
+        else:
+            toast("No internet")
+    def display_medicine(self):
+        self.root.ids.attend.data = {}
+        product = TR.get_medicine(TR())
+        if not product:
+            self.root.ids.attend.data.append(
+                {
+                    "viewclass": "Medicine",
+                    "name": "No medicine yet!",
+                }
+            )
+        else:
+            for i, y in product.items():
+                self.root.ids.attend.data.append(
+                    {
+                        "viewclass": "Medicine",
+                        "name": y["name"],
+                        "price": y["price"],
+                        "quantity": y["quantity"],
+                        "expire": y["expiration_date"]
+                    }
+                )
+
 
     def request_android_permissions(self):
         from android.permissions import request_permissions, Permission
