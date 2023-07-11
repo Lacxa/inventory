@@ -43,8 +43,8 @@ class req:
 
     def verfy(self, pin):
         print(req.pin)
-        secrete_key = "YmE1NmRmNzVmY2JhN2RjYmI0ZGU1OTJlMzFlNWU4MDdhYzQ2MWNlNWVmZDVkNWFkNzYxOWUyNjRmNGNmYmNiNQ=="
-        api_key = 'b7a0b864387611b6 '
+        secrete_key = "N2Q5MmMxMjk0YmFjMjNmZGM4NjU2MzFkMGQzY2ZhYjBiZWM2ZGE3N2Q1NjYzZDgxYTZhYzY5MjBkN2U3Zjc4Zg=="
+        api_key = 'a814f71f4c917bdb'
         Authorize(api_key, secrete_key)
         data = OTP.verify(pin_id=self.pin, pin=pin)
         print(data)

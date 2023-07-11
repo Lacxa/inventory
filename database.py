@@ -5,26 +5,22 @@ from kivymd.toast import toast
 import network
 
 
+
 class Transfer:
-    current_time = str(datetime.now())
-    date, time = current_time.strip().split()
-    week_day = ""
-    day = ""
-    point = '1'
-    bought = '1'
-    loyal = '1'
-    orders = '1'
-    number = 0
-    order_id = '123'
 
     def register(self, product_id, name, quantity, price, exp):
-        if network.ping_net():
-            import firebase_admin
-            firebase_admin._apps.clear()
-            from firebase_admin import credentials, initialize_app, db
-            if not firebase_admin._apps:
-                cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
-                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Inventory').child('Shop').child("Products")
+            data = ref.get()
+            if product_id in data:
+                return False
+
+            else:
                 ref = db.reference('Inventory').child('Shop').child("Products").child(product_id)
                 print("uploaded")
                 ref.set(
@@ -33,12 +29,10 @@ class Transfer:
                         "quantity": quantity,
                         "price": price,
                         "expiration_date": exp,
+                        "days_to_exp": self.day_remain(exp)
                     }
                 )
-            return True
-
-        else:
-            toast("No internet")
+        return True
 
     def upd(self, product_id, sell):
         if network.ping_net():
@@ -71,10 +65,9 @@ class Transfer:
                 data = ref.get()
 
                 if product_id in data:
-
                     return data[product_id]
-                else:
 
+                else:
                     return "nodata"
 
     def get_sell(self, p_i):
@@ -108,6 +101,8 @@ class Transfer:
             if not firebase_admin._apps:
                 cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
                 initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+
+
                 sells = self.get_sell(p_i)
                 if sells:
                     sell_new = str(int(sells[0]) + int(sell))
@@ -148,6 +143,7 @@ class Transfer:
             data = ref.get()
 
             return data
+
     def get_medicine(self):
         import firebase_admin
         firebase_admin._apps.clear()
@@ -161,6 +157,83 @@ class Transfer:
 
             return data
 
+
+    def delete_product(self, product_id):
+        if network.ping_net():
+            import firebase_admin
+            firebase_admin._apps.clear()
+            from firebase_admin import credentials, initialize_app, db
+            if not firebase_admin._apps:
+                cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                ref = db.reference('Inventory').child('Shop').child("Products").child(product_id)
+                ref.delete()
+
+        else:
+            toast("No internet")
+
+    def get_register(self):
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(
+                "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Register').child("phone")
+            data = ref.get()
+            if data:
+                new = data["user_phone"]
+                return new
+            else:
+                return "nodata"
+
+
+    def pharmacist(self, phone, password):
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(
+                "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Register').child("phone")
+            ref.set(
+                {
+                    "user_phone": phone,
+                    "password": password,
+                }
+            )
+
+    def expire(self):
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(
+                "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Inventory').child('Shop').child("Products")
+            data = ref.get()
+
+            return data
+
+    def get_login(self, phone, passe):
+        if True:
+            import firebase_admin
+            firebase_admin._apps.clear()
+            from firebase_admin import credentials, initialize_app, db
+            if not firebase_admin._apps:
+                cred = credentials.Certificate(
+                    "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+                ref = db.reference('Register').child("phone")
+
+                data = ref.get()
+                if passe == data["password"]:
+                    return True
+                else:
+                    return False
 
     def year(self):
         current_time = str(datetime.now())
@@ -176,5 +249,29 @@ class Transfer:
 
         return f"{m}_{d}"
 
+    def day_remain(self, exp_date):
+        nowoy = datetime.now().date().year
+        nowom = datetime.now().date().month
 
-#Transfer.fetch_history(Transfer(), "2023", "05_11")
+        now = f"{nowoy}-{nowom}"
+
+        m1 = int(now.strip().split("-")[1])
+
+        m2 = int(exp_date.strip().split("-")[1])
+
+        y1 = int(now.strip().split("-")[0])
+
+        y2 = int(exp_date.strip().split("-")[0])
+
+        yd = (y2 - y1) * 365
+
+        ytm1 = 30 * m1
+
+        ytm2 = 30 * m2
+
+        v = ytm2 - ytm1 + yd
+
+        return v
+
+
+#Transfer.fetch_history(Transfer(), "2023-01-01", "2023-01-31")

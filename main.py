@@ -1,4 +1,6 @@
+import os
 import re
+import time
 
 import phonenumbers
 from PIL import Image
@@ -44,7 +46,10 @@ class Scan_Analyze(Preview):
             else:
                 print("NOt found")
 
-    """  FOR LOG IN PHONE
+
+class NumberField(MDTextField):
+    pat = re.compile('[^0-9]')
+
     def insert_text(self, substring, from_undo=False):
 
         if len(self.text) == 0 and substring != "0":
@@ -53,10 +58,14 @@ class Scan_Analyze(Preview):
         if len(self.text) == 10:
             return
 
+        if len(self.text) == 1 and substring != "6" and substring != "7":
+            return
+
         if not substring.isdigit():
             return
 
-        return super(NumberOnlyField, self).insert_text(substring, from_undo=from_undo)"""
+        return super(NumberField, self).insert_text(substring, from_undo=from_undo)
+
 
 class NumberOnlyField(MDTextField):
     pat = re.compile('[^0-9]')
@@ -90,21 +99,20 @@ class MainApp(MDApp):
     get_id = StringProperty("")
     s_id = StringProperty("")
 
-
     # Medicine
     name = StringProperty("......................")
     quantity = StringProperty("......................")
     price = StringProperty("......................")
     expire = StringProperty("......................")
+    days_to_expire = StringProperty("......................")
 
-    selected_date = StringProperty("Open date picker")
+    selected_date = StringProperty("Select Transaction Date")
     year = StringProperty("")
     datep = StringProperty("")
 
     sales = StringProperty("")
     sell = StringProperty("")
     total = StringProperty("---")
-
 
     sname = StringProperty("")
     squantity = StringProperty("")
@@ -113,6 +121,10 @@ class MainApp(MDApp):
 
     date = StringProperty("Open date picker")
 
+    # 0682590979
+    register = StringProperty("")
+
+    """ CAMERA CONNECTIONS """
 
     def on_kv_post(self):
         self.root.ids.preview.connect_camera(enable_analyze_pixels=True, default_zoom=0.0)
@@ -121,13 +133,11 @@ class MainApp(MDApp):
     def stop_camera(self):
         self.root.ids.preview.disconnect_camera()
 
-
     def on_kv_post2(self):
         self.root.ids.preview2.connect_camera(enable_analyze_pixels=True, default_zoom=0.0)
 
     def stop_camera2(self):
         self.root.ids.preview2.disconnect_camera()
-
 
     def on_kv_post3(self):
         self.root.ids.preview3.connect_camera(enable_analyze_pixels=True, default_zoom=0.0)
@@ -149,7 +159,6 @@ class MainApp(MDApp):
                 self.screen_capture("add")
             else:
                 toast("show barcode")
-        self.root.ids.ti.text = str(result)
 
     @mainthread
     def get_result(self, result):
@@ -163,9 +172,9 @@ class MainApp(MDApp):
                 self.get_id = Search_id
                 print(self.get_id)
                 self.screen_capture("search")
+
             else:
                 toast("show barcode")
-        self.root.ids.t2.text = str(result)
 
     @mainthread
     def search_result(self, result):
@@ -178,32 +187,26 @@ class MainApp(MDApp):
             if type != "QRCODE":
                 self.s_id = sell_id
                 print(self.s_id)
-                self.sell_medicine(self.s_id)
+                self.screen_capture("availability")
+                Clock.schedule_once(lambda x: self.sell_medicine(self.s_id), 1)
             else:
                 toast("show barcode")
-        self.root.ids.t2.text = str(result)
 
     def build(self):
         pass
 
-    def remember_me(self, phone, dust, name):
-        with open("credential/admin.txt", "w") as fl:
-            fl.write(phone + "\n")
-            fl.write(dust)
-        with open("credential/admin_info.txt", "w") as ui:
-            ui.write(name)
-        fl.close()
-        ui.close()
+    """ REGISTRATION , VERIFICATION AND REMEMBER ME(login) """
 
     def validate_user(self, phone, name):
         if not self.phone_number_check_admin(phone):
-            toast("please enter your phone number correctly")
+            pass
         elif name == "":
             toast("please enter your password")
         else:
             self.t_phone = phone
             self.t_name = name
             self.phone_verify(phone)
+            self.remember_me(phone)
 
     def phone_verify(self, phone):
         toast('wait a moment')
@@ -236,12 +239,36 @@ class MainApp(MDApp):
 
     def register_caller(self, phone, name):
         try:
-            TR.register(TR(), phone, name)
+            TR.pharmacist(TR(), phone, name)
             self.screen_capture("home")
         except:
             toast('OPPs!, No connection')
 
+    def user_login(self, phone, passe):
+        if TR.get_login(TR(), phone, passe):
+            self.screen_capture("home")
+        else:
+            toast("Invalid login")
+
+    def remember_me(self, phone):
+        with open("register.txt", "w") as fl:
+            fl.write(phone)
+        fl.close()
+
+    def register_check(self):
+        sm = self.root
+        file_size = os.path.getsize("register.txt")
+        if file_size == 0:
+            self.screen_capture("register")
+        else:
+            sm.current = "register"
+            self.screen_capture("login")
+
+
+    """ MEDICINE FUNCTIONS """
+
     def add_medicine(self, product_id, name, quantity, price, exp):
+        if network.ping_net():
             dates = self.date
             if product_id == "":
                 toast("Please scan medicine first")
@@ -256,37 +283,67 @@ class MainApp(MDApp):
             else:
                 if TR.register(TR(), product_id, name, quantity, price, exp):
                     toast("Medicine Added successfully")
-                    self.display_medicine()
                 else:
-                    toast("No internet")
+                    toast("Medicine already exist")
+        else:
+            toast("No internet")
 
+    @mainthread
+    def delete_product(self, name):
+        TR.delete_product(TR(), name)
+        self.remove()
+        self.display_medicine()
+        self.check_medicine(name)
+
+    def remove(self):
+        spiner = self.root.ids.spine_del
+        spiner.active = True
+
+    def check_medicine(self, id):
+        data = TR.fetch_medicine(TR(), id)
+        if data == "nodata":
+            self.deleted()
+        else:
+            pass
+
+    def deleted(self):
+        spiner = self.root.ids.spine_del
+        spiner.active = False
+
+    def scan_medicine(self, ):
+        if self.data_id != "":
+            button = self.root.ids.med
+            button.pos_hint = {'center_x': 1.5, 'center_y': .75}
 
     def search_medicine(self, product_id):
         if network.ping_net():
             data = TR.fetch_medicine(TR(), product_id)
-            if data:
+            if data == "nodata":
+                toast("nodata found")
+
+            elif data:
                 self.expire = data['expiration_date']
                 self.name = data['name']
                 self.price = data['price']
                 self.quantity = data['quantity']
+                self.days_to_expire = data["days_to_exp"]
+
         else:
             toast("No internet")
 
     def sell_medicine(self, product_id):
         if network.ping_net():
             data = TR.fetch_medicine(TR(), product_id)
-            if data:
+            if data == "nodata":
+                self.screen_capture("move")
+
+            elif data:
                 self.sexpire = data['expiration_date']
                 self.sname = data['name']
                 self.sprice = data['price']
                 self.squantity = data['quantity']
-                self.screen_capture("availability")
-
-            else:
-                self.screen_capture("move")
         else:
             toast("No internet")
-
 
     def tes2(self, sell):
         TR.upd(TR(), self.s_id, sell)
@@ -310,6 +367,8 @@ class MainApp(MDApp):
             self.tes2(self.sell)
             self.squantity = self.sell
             self.transaction_history()
+            self.today_history()
+            self.screen_capture("sell")
             toast("sell a success")
 
     def Total(self, sell_quantity):
@@ -321,6 +380,34 @@ class MainApp(MDApp):
 
     def transaction_history(self, ):
         TR.history(TR(), self.s_id, self.sname, self.sales, self.total)
+
+    def today_history(self):
+        if network.ping_net():
+            self.root.ids.today.data = {}
+            history = TR.today_history(TR())
+
+            if not history:
+                self.root.ids.today.data.append(
+                    {
+                        "viewclass": "Notransaction",
+                        "name": "No history available!",
+                    }
+                )
+            else:
+                for i, y in history.items():
+                    self.root.ids.today.data.append(
+                        {
+                            "viewclass": "Transaction",
+                            "name": y["Name"],
+                            "sell": y["sell"],
+                            "total": y["total"]
+
+                        }
+                    )
+        else:
+            toast("No internet")
+
+    """ DATE FUNCTIONS """
 
     def on_save(self, instance, value, date_ranges):
         self.date = str(value)
@@ -335,6 +422,7 @@ class MainApp(MDApp):
     def on_cancel(self, instance, value):
         '''Events called when the "CANCEL" dialog box button is clicked.'''
 
+
     def show_date_picker(self):
         self.theme_cls.primary_palette = "Blue"
         date_dialog = MDDatePicker()
@@ -347,32 +435,16 @@ class MainApp(MDApp):
         date_dialog.bind(on_save=self.on_savu, on_cancel=self.on_cancel)
         date_dialog.open()
 
-    def scan_medicine(self, ):
-        if self.data_id != "":
-            button = self.root.ids.med
-            button.pos_hint = {'center_x': 1.5, 'center_y': .75}
-
-    def screen_capture(self, screen):
-        sm = self.root
-        sm.current = screen
-        if screen in self.screens:
-            pass
-        else:
-            self.screens.append(screen)
-        print(self.screens)
-        self.screens_size = len(self.screens) - 1
-        self.current = self.screens[len(self.screens) - 1]
-        print(f'size {self.screens_size}')
-        print(f'current screen {screen}')
-
-
     def on_start(self):
         self.keyboard_hooker()
-        #self.request_android_permissions()
+        Clock.schedule_once(lambda x: self.register_check(), 6)
+        # self.request_android_permissions()
+
+    """ KEYBOARD INTEGRATION """
 
     def keyboard_hooker(self, *args):
         EventLoop.window.bind(on_keyboard=self.hook_keyboard)
-        self.display_medicine()
+        self.find_register()
 
     def hook_keyboard(self, window, key, *largs):
         print(self.screens_size)
@@ -389,6 +461,21 @@ class MainApp(MDApp):
             toast('Press Home button!')
             return True
 
+    """ SCREEN FUNCTIONS """
+
+    def screen_capture(self, screen):
+        sm = self.root
+        sm.current = screen
+        if screen in self.screens:
+            pass
+        else:
+            self.screens.append(screen)
+        print(self.screens)
+        self.screens_size = len(self.screens) - 1
+        self.current = self.screens[len(self.screens) - 1]
+        print(f'size {self.screens_size}')
+        print(f'current screen {screen}')
+
     def screen_leave(self):
         print(f"your were in {self.current}")
         last_screens = self.current
@@ -397,6 +484,8 @@ class MainApp(MDApp):
         self.screens_size = len(self.screens) - 1
         self.current = self.screens[len(self.screens) - 1]
         self.screen_capture(self.current)
+
+    """ DISPENSING FUNCTIONS """
 
     def display_history(self):
         if network.ping_net():
@@ -423,28 +512,54 @@ class MainApp(MDApp):
                     )
         else:
             toast("No internet")
+
     def display_medicine(self):
-        self.root.ids.attend.data = {}
-        product = TR.get_medicine(TR())
-        if not product:
-            self.root.ids.attend.data.append(
-                {
-                    "viewclass": "Medicine",
-                    "name": "No medicine yet!",
-                }
-            )
-        else:
-            for i, y in product.items():
+        if network.ping_net():
+            self.root.ids.attend.data = {}
+            product = TR.get_medicine(TR())
+            if not product:
                 self.root.ids.attend.data.append(
                     {
                         "viewclass": "Medicine",
-                        "name": y["name"],
-                        "price": y["price"],
-                        "quantity": y["quantity"],
-                        "expire": y["expiration_date"]
+                        "name": "No medicine yet!",
                     }
                 )
+            else:
+                for i, y in product.items():
+                    self.root.ids.attend.data.append(
+                        {
+                            "viewclass": "Medicine",
+                            "name": y["name"],
+                            "price": y["price"],
+                            "quantity": y["quantity"],
+                            "expire": y["expiration_date"],
+                            "idd": i
+                        }
+                    )
 
+        else:
+            toast("No internet")
+
+    """ SENDING MESSAGE """
+
+    def find_register(self):
+        self.register = TR.get_register(TR())
+        self.expired()
+
+    def expired(self):
+        data = TR.expire(TR())
+
+        for i, y in data.items():
+            date = y["days_to_exp"]
+            name = y["name"],
+
+            if date <= 30:
+                self.send_message(date, name)
+
+    def send_message(self, date, name):
+        SM.send_sms(self.register, date, name)
+
+    """ REQUEST ANDROID PERMISSIONS """
 
     def request_android_permissions(self):
         from android.permissions import request_permissions, Permission
@@ -456,5 +571,6 @@ class MainApp(MDApp):
                 print("callback. Some permissions refused.")
 
         request_permissions([Permission.CAMERA], callback)
+
 
 MainApp().run()

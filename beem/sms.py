@@ -16,7 +16,7 @@ def phone_repr(phone):
         return public_number
 
 
-def send_sms(phone, product):
+def send_sms(phone, date, name):
     URL = 'https://apisms.beem.africa/v1/send'
     content_type = 'application/json'
     source_addr = 'INVENTORY'
@@ -29,7 +29,8 @@ def send_sms(phone, product):
         'source_addr': 'INVENTORY',
         'schedule_time': '',
         'encoding': '0',
-        'message': f'product name {product}, product id  ''product is near expire',
+        'message': f'Medicine name "{name}", is near to expire'
+                    f' days remaining  {date} days',
         'recipients': [
             {
                 'recipient_id': 1,
@@ -47,7 +48,6 @@ def send_sms(phone, product):
     print(first_request.status_code)
     print(first_request.json())
     return (first_request.json())
-
 
 
 #send_sms('0715700411', 'Albendazol', '6754764799',)
