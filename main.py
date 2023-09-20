@@ -1,6 +1,8 @@
+import json
 import os
 import re
-import time
+from datetime import datetime
+from threading import Thread
 
 import phonenumbers
 from PIL import Image
@@ -13,7 +15,7 @@ from camera4kivy import Preview
 from kivy.base import EventLoop
 from kivy.clock import Clock, mainthread
 from kivy.core.window import Window
-from kivy.properties import StringProperty, NumericProperty, ObjectProperty
+from kivy.properties import StringProperty, NumericProperty, ObjectProperty, DictProperty
 from kivymd.app import MDApp
 from kivymd.toast import toast
 from kivymd.uix.textfield import MDTextField
@@ -45,6 +47,7 @@ class Scan_Analyze(Preview):
                 self.extracted_data(list_of_all_barcodes[0])
             else:
                 print("NOt found")
+
 
 
 class NumberField(MDTextField):
@@ -206,12 +209,12 @@ class MainApp(MDApp):
             self.t_phone = phone
             self.t_name = name
             self.phone_verify(phone)
-            self.remember_me(phone)
 
     def phone_verify(self, phone):
         toast('wait a moment')
         tp.req.otp_req(tp.req(), phone)
-        self.screen_capture("verify")
+        sm = self.root
+        sm.current = "verify"
 
     def verify(self, pin):
         if tp.req.verfy(tp.req(), pin):
@@ -237,32 +240,38 @@ class MainApp(MDApp):
         else:
             toast("enter phone number!")
 
-    def register_caller(self, phone, name):
-        try:
-            TR.pharmacist(TR(), phone, name)
-            self.screen_capture("home")
-        except:
-            toast('OPPs!, No connection')
+    def register_caller(self, name, code):
+        #TR.pharmacist(TR(), phone, name)
+        with open("user.json", "w") as file:
+            data = {"user": name, "password": code}
+            data_dump = json.dumps(data, indent=6)
+            file.write(data_dump)
+            file.close()
+            sm = self.root
+            sm.current = "home"
 
     def user_login(self, phone, passe):
-        if TR.get_login(TR(), phone, passe):
-            self.screen_capture("home")
+        #if TR.get_login(TR(), phone, passe):
+        data = self.load("user.json")
+        if phone == data["user"] and passe == data["password"]:
+            sm = self.root
+            sm.current = "home"
         else:
             toast("Invalid login")
 
-    def remember_me(self, phone):
-        with open("register.txt", "w") as fl:
-            fl.write(phone)
-        fl.close()
-
-    def register_check(self):
-        sm = self.root
-        file_size = os.path.getsize("register.txt")
+    def login_check(self, *args):
+        file_size = os.path.getsize("user.json")
         if file_size == 0:
-            self.screen_capture("register")
-        else:
+            sm = self.root
             sm.current = "register"
-            self.screen_capture("login")
+        else:
+            sm = self.root
+            sm.current = "login"
+
+    def load(self, data_file_name):
+        with open(data_file_name, "r") as file:
+            initial_data = json.load(file)
+        return initial_data
 
 
     """ MEDICINE FUNCTIONS """
@@ -290,21 +299,18 @@ class MainApp(MDApp):
 
     @mainthread
     def delete_product(self, name):
-        TR.delete_product(TR(), name)
         self.remove()
-        self.display_medicine()
-        self.check_medicine(name)
+        thread = Thread(target=TR.delete_product, args=(TR(), name))
+        thread.start()
+        self.check_medicine()
 
     def remove(self):
         spiner = self.root.ids.spine_del
         spiner.active = True
 
-    def check_medicine(self, id):
-        data = TR.fetch_medicine(TR(), id)
-        if data == "nodata":
-            self.deleted()
-        else:
-            pass
+    def check_medicine(self):
+        self.display_medicine()
+        self.deleted()
 
     def deleted(self):
         spiner = self.root.ids.spine_del
@@ -437,14 +443,16 @@ class MainApp(MDApp):
 
     def on_start(self):
         self.keyboard_hooker()
-        Clock.schedule_once(lambda x: self.register_check(), 6)
+        thread = Thread(target=self.find_register)
+        thread.start()
+
+        Clock.schedule_once(self.login_check, 6)
         # self.request_android_permissions()
 
     """ KEYBOARD INTEGRATION """
 
     def keyboard_hooker(self, *args):
         EventLoop.window.bind(on_keyboard=self.hook_keyboard)
-        self.find_register()
 
     def hook_keyboard(self, window, key, *largs):
         print(self.screens_size)
@@ -513,19 +521,23 @@ class MainApp(MDApp):
         else:
             toast("No internet")
 
-    def display_medicine(self):
+
+
+    product = DictProperty()
+
+    def display_medicine(self, *args):
         if network.ping_net():
             self.root.ids.attend.data = {}
-            product = TR.get_medicine(TR())
-            if not product:
+            data = TR.get_medicine(TR())
+            if not data: #self.product
                 self.root.ids.attend.data.append(
                     {
-                        "viewclass": "Medicine",
+                        "viewclass": "Nomedicine",
                         "name": "No medicine yet!",
                     }
                 )
             else:
-                for i, y in product.items():
+                for i, y in data.items():
                     self.root.ids.attend.data.append(
                         {
                             "viewclass": "Medicine",
@@ -542,22 +554,59 @@ class MainApp(MDApp):
 
     """ SENDING MESSAGE """
 
-    def find_register(self):
-        self.register = TR.get_register(TR())
+    def find_register(self, *args):
+        #self.product = TR.get_medicine(TR())
         self.expired()
 
     def expired(self):
         data = TR.expire(TR())
+        if data:
+            for i, y in data.items():
+                date = y["expiration_date"]
+                name = y["name"],
 
-        for i, y in data.items():
-            date = y["days_to_exp"]
-            name = y["name"],
+                self.remain_date(date, name)
 
-            if date <= 30:
-                self.send_message(date, name)
 
-    def send_message(self, date, name):
-        SM.send_sms(self.register, date, name)
+    def remain_date(self, exp, name):
+        nowoy = datetime.now().date().year
+        nowom = datetime.now().date().month
+
+        now = f"{nowoy}-{nowom}"
+
+        m1 = int(now.strip().split("-")[1])
+
+        m2 = int(exp.strip().split("-")[1])
+
+        y1 = int(now.strip().split("-")[0])
+
+        y2 = int(exp.strip().split("-")[0])
+
+        yd = (y2 - y1) * 365
+
+        ytm1 = 30 * m1
+
+        ytm2 = 30 * m2
+
+        total_days = ytm2 - ytm1 + yd
+
+        if 0 < int(total_days) <= 30:
+            days = f"{name} Nearly to expired, remain days: {total_days} to expire"
+            self.send_message(days)
+
+        elif int(total_days) <= 0:
+            days = f"{name} Expired ,days passed: {total_days}"
+            self.send_message(days)
+
+    def send_message(self, days):
+        if network.ping_net():
+            data = self.load("user.json")
+            self.register = data["user"]
+            if self.register:
+                SM.send_sms(self.register, days)
+
+        else:
+            print("sms no internrt")
 
     """ REQUEST ANDROID PERMISSIONS """
 

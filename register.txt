@@ -1,5 +1,0 @@
-0714069014
-
-
-sm = self.root
-sm.current = "camera name"

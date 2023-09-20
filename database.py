@@ -7,7 +7,6 @@ import network
 
 
 class Transfer:
-
     def register(self, product_id, name, quantity, price, exp):
         import firebase_admin
         firebase_admin._apps.clear()
@@ -17,7 +16,7 @@ class Transfer:
             initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
             ref = db.reference('Inventory').child('Shop').child("Products")
             data = ref.get()
-            if product_id in data:
+            if data and product_id in data:
                 return False
 
             else:
@@ -63,12 +62,13 @@ class Transfer:
                 initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
                 ref = db.reference('Inventory').child('Shop').child("Products")
                 data = ref.get()
+                if data:
 
-                if product_id in data:
-                    return data[product_id]
+                    if product_id in data:
+                        return data[product_id]
 
-                else:
-                    return "nodata"
+                    else:
+                        return "nodata"
 
     def get_sell(self, p_i):
             import firebase_admin
@@ -144,6 +144,19 @@ class Transfer:
 
             return data
 
+    def today_history(self):
+        import firebase_admin
+        firebase_admin._apps.clear()
+        from firebase_admin import credentials, initialize_app, db
+        if not firebase_admin._apps:
+            cred = credentials.Certificate("credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
+            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
+            ref = db.reference('Inventory').child('Shop').child("History").child(self.year()).child(self.month_date())
+            data = ref.get()
+
+            return data
+
+
     def get_medicine(self):
         import firebase_admin
         firebase_admin._apps.clear()
@@ -172,39 +185,6 @@ class Transfer:
         else:
             toast("No internet")
 
-    def get_register(self):
-        import firebase_admin
-        firebase_admin._apps.clear()
-        from firebase_admin import credentials, initialize_app, db
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(
-                "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
-            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-            ref = db.reference('Register').child("phone")
-            data = ref.get()
-            if data:
-                new = data["user_phone"]
-                return new
-            else:
-                return "nodata"
-
-
-    def pharmacist(self, phone, password):
-        import firebase_admin
-        firebase_admin._apps.clear()
-        from firebase_admin import credentials, initialize_app, db
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(
-                "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
-            initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-            ref = db.reference('Register').child("phone")
-            ref.set(
-                {
-                    "user_phone": phone,
-                    "password": password,
-                }
-            )
-
     def expire(self):
         import firebase_admin
         firebase_admin._apps.clear()
@@ -217,23 +197,6 @@ class Transfer:
             data = ref.get()
 
             return data
-
-    def get_login(self, phone, passe):
-        if True:
-            import firebase_admin
-            firebase_admin._apps.clear()
-            from firebase_admin import credentials, initialize_app, db
-            if not firebase_admin._apps:
-                cred = credentials.Certificate(
-                    "credentials/medics-inventorry-firebase-adminsdk-jgzwk-9a41481b87.json")
-                initialize_app(cred, {'databaseURL': 'https://medics-inventorry-default-rtdb.firebaseio.com/'})
-                ref = db.reference('Register').child("phone")
-
-                data = ref.get()
-                if passe == data["password"]:
-                    return True
-                else:
-                    return False
 
     def year(self):
         current_time = str(datetime.now())
@@ -275,3 +238,5 @@ class Transfer:
 
 
 #Transfer.fetch_history(Transfer(), "2023-01-01", "2023-01-31")
+
+#Transfer.register(Transfer(), "97658577668", "test", "50", "500", "2023-10-5")
